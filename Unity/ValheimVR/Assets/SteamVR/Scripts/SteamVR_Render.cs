@@ -153,14 +153,20 @@ namespace Valve.VR
         {
             if (doesPathExist == false)
                 return false;
-            else if (doesPathExist == null)
+            else if (doesPathExist == null) { }
                 doesPathExist = System.IO.File.Exists(externalCameraConfigPath);
+
+            if(doesPathExist == false) 
+            {
+                Debug.Log("SteamVR_Render.CheckExternalCamera: No ExternalCamera.cfg found");
+            }
 
             if (externalCamera == null && doesPathExist == true)
             {
                 GameObject prefab = Resources.Load<GameObject>("SteamVR_ExternalCamera");
                 if (prefab == null)
                 {
+                    Debug.Log("SteamVR_Render.CheckExternalCamera: Could not load prefab");
                     doesPathExist = false;
                     return false;
                 }
@@ -168,8 +174,12 @@ namespace Valve.VR
                 {
                     if (SteamVR_Settings.instance.legacyMixedRealityCamera)
                     {
-                        if (SteamVR_ExternalCamera_LegacyManager.hasCamera == false)
+                        Debug.Log("SteamVR_Render.CheckExternalCamera: Using Legacy Camera");
+                        if (SteamVR_ExternalCamera_LegacyManager.hasCamera == false) 
+                        {
+                            Debug.Log("SteamVR_Render.CheckExternalCamera: Legacy Camera does not exist");
                             return false;
+                        }
 
                         GameObject instance = Instantiate(prefab);
                         instance.gameObject.name = "External Camera";
@@ -181,6 +191,7 @@ namespace Valve.VR
                     }
                     else
                     {
+                        Debug.Log("SteamVR_Render.CheckExternalCamera: Using Modern Camera");
                         SteamVR_Action_Pose cameraPose = SteamVR_Settings.instance.mixedRealityCameraPose;
                         SteamVR_Input_Sources cameraSource = SteamVR_Settings.instance.mixedRealityCameraInputSource;
 
@@ -192,6 +203,7 @@ namespace Valve.VR
 
                         if (cameraPose == null)
                         {
+                            Debug.Log("SteamVR_Render.CheckExternalCamera: No Camera Pose");
                             doesPathExist = false;
                             return false;
                         }
@@ -209,7 +221,7 @@ namespace Valve.VR
                     }
                 }
             }
-
+            Debug.Log("SteamVR_Render.CheckExternalCamera: Result - " + (externalCamera != null).ToString());
             return (externalCamera != null);
         }
 
