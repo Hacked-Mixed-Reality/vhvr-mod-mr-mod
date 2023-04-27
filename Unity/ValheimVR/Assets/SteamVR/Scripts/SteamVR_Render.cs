@@ -163,7 +163,10 @@ namespace Valve.VR
 
             if (externalCamera == null && doesPathExist == true)
             {
-                GameObject prefab = Resources.Load<GameObject>("SteamVR_ExternalCamera");
+                GameObject prefab = new GameObject("NewCamera_Prefab");
+                GameObject childObject = new GameObject("NewCamera_childObject");
+                SteamVR_ExternalCamera newCamera = childObject.AddComponent<SteamVR_ExternalCamera>();
+                childObject.transform.parent = prefab.transform;
                 if (prefab == null)
                 {
                     Debug.Log("SteamVR_Render.CheckExternalCamera: Could not load prefab");
