@@ -86,7 +86,9 @@ namespace Valve.VR
         private static SteamVR_Action_Boolean p_laserPointers_Jump;
         
         private static SteamVR_Action_Vector2 p_laserPointers_PitchAndYaw;
-        
+
+        private static SteamVR_Action_Pose p_externalCamera;
+
         public static SteamVR_Action_Boolean default_InteractUI
         {
             get
@@ -366,7 +368,16 @@ namespace Valve.VR
                 return SteamVR_Actions.p_laserPointers_PitchAndYaw.GetCopy<SteamVR_Action_Vector2>();
             }
         }
-        
+
+        public static SteamVR_Action_Pose externalCamera
+        {
+            get
+            {
+                Debug.Log("SteamVR_Input_Actions: Getting External Camera");
+                return SteamVR_Actions.p_externalCamera.GetCopy<SteamVR_Action_Pose>();
+            }
+        }
+
         private static void InitializeActionArrays()
         {
             Valve.VR.SteamVR_Input.actions = new Valve.VR.SteamVR_Action[] {
@@ -512,7 +523,9 @@ namespace Valve.VR
                     SteamVR_Actions.laserPointers_RightClick,
                     SteamVR_Actions.laserPointers_ClickModifier,
                     SteamVR_Actions.laserPointers_Jump,
-                    SteamVR_Actions.laserPointers_PitchAndYaw};
+                    SteamVR_Actions.laserPointers_PitchAndYaw,
+                    SteamVR_Actions.externalCamera
+            };
         }
         
         private static void PreInitActions()
@@ -552,6 +565,7 @@ namespace Valve.VR
             SteamVR_Actions.p_laserPointers_ClickModifier = ((SteamVR_Action_Boolean)(SteamVR_Action.Create<SteamVR_Action_Boolean>("/actions/LaserPointers/in/ClickModifier")));
             SteamVR_Actions.p_laserPointers_Jump = ((SteamVR_Action_Boolean)(SteamVR_Action.Create<SteamVR_Action_Boolean>("/actions/LaserPointers/in/Jump")));
             SteamVR_Actions.p_laserPointers_PitchAndYaw = ((SteamVR_Action_Vector2)(SteamVR_Action.Create<SteamVR_Action_Vector2>("/actions/LaserPointers/in/PitchAndYaw")));
+            SteamVR_Actions.p_externalCamera = ((SteamVR_Action_Pose)(SteamVR_Action.Create<SteamVR_Action_Pose>("/actions/mixedreality/in/ExternalCamera")));
         }
     }
 }
