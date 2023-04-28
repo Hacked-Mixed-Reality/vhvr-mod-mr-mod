@@ -210,7 +210,13 @@ namespace Valve.VR
                             doesPathExist = false;
                             return false;
                         }
-
+                        Debug.Log("SteamVR_Render.CheckExternalCamera: cameraPose - " + cameraPose.ToString());
+                        Debug.Log("SteamVR_Render.CheckExternalCamera: cameraSource - " + cameraSource.ToString());
+                        if (cameraPose != null)
+                        {
+                            Debug.Log("SteamVR_Render.CheckExternalCamera: cameraPose[cameraSource].active - " + cameraPose[cameraSource].active.ToString());
+                            Debug.Log("SteamVR_Render.CheckExternalCamera: cameraPose[cameraSource].deviceIsConnected - " + cameraPose[cameraSource].deviceIsConnected.ToString());
+                        }
                         if (cameraPose != null && cameraPose[cameraSource].active && cameraPose[cameraSource].deviceIsConnected)
                         {
                             GameObject instance = Instantiate(prefab);
