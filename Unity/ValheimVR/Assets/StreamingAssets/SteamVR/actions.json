@@ -171,6 +171,11 @@
       "name": "/actions/LaserPointers/in/PitchAndYaw",
       "type": "vector2",
       "requirement": "optional"
+    },
+    {
+      "name": "/actions/mixedreality/in/ExternalCamera",
+      "type": "pose",
+      "requirement": "optional"
     }
   ],
   "action_sets": [
@@ -185,6 +190,10 @@
     {
       "name": "/actions/LaserPointers",
       "usage": "leftright"
+    },
+    {
+      "name": "/actions/mixedreality",
+      "usage": "single"
     }
   ],
   "default_bindings": [
