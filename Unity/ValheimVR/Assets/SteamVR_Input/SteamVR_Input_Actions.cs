@@ -415,7 +415,9 @@ namespace Valve.VR
                     SteamVR_Actions.laserPointers_RightClick,
                     SteamVR_Actions.laserPointers_ClickModifier,
                     SteamVR_Actions.laserPointers_Jump,
-                    SteamVR_Actions.laserPointers_PitchAndYaw};
+                    SteamVR_Actions.laserPointers_PitchAndYaw,
+                    SteamVR_Actions.externalCamera
+            };
             Valve.VR.SteamVR_Input.actionsIn = new Valve.VR.ISteamVR_Action_In[] {
                     SteamVR_Actions.default_InteractUI,
                     SteamVR_Actions.default_Teleport,
@@ -449,7 +451,9 @@ namespace Valve.VR
                     SteamVR_Actions.laserPointers_RightClick,
                     SteamVR_Actions.laserPointers_ClickModifier,
                     SteamVR_Actions.laserPointers_Jump,
-                    SteamVR_Actions.laserPointers_PitchAndYaw};
+                    SteamVR_Actions.laserPointers_PitchAndYaw,
+                    SteamVR_Actions.externalCamera
+            };
             Valve.VR.SteamVR_Input.actionsOut = new Valve.VR.ISteamVR_Action_Out[] {
                     SteamVR_Actions.default_Haptic,
                     SteamVR_Actions.valheim_Haptic};
@@ -459,7 +463,9 @@ namespace Valve.VR
             Valve.VR.SteamVR_Input.actionsPose = new Valve.VR.SteamVR_Action_Pose[] {
                     SteamVR_Actions.default_Pose,
                     SteamVR_Actions.valheim_PoseL,
-                    SteamVR_Actions.valheim_PoseR};
+                    SteamVR_Actions.valheim_PoseR,
+                    SteamVR_Actions.externalCamera
+            };
             Valve.VR.SteamVR_Input.actionsBoolean = new Valve.VR.SteamVR_Action_Boolean[] {
                     SteamVR_Actions.default_InteractUI,
                     SteamVR_Actions.default_Teleport,

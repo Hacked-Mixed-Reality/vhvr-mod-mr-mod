@@ -490,6 +490,7 @@ namespace Valve.VR
             if (initialized)
                 return rawSetActive[sourceIndex] || rawSetActive[0];
 
+            Debug.Log("[Mixed Reality Telemetry(SteamVR_ActionSet_Data.IsActive)] " + source.ToString() + " Not active beacuase not initialised");
             return false;
         }
 

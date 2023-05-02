@@ -467,7 +467,10 @@ namespace Valve.VR
         public override ulong lastActiveOrigin { get { return lastPoseActionData.activeOrigin; } }
 
         /// <summary>True if this action is bound and the ActionSet is active</summary>
-        public override bool active { get { return activeBinding && action.actionSet.IsActive(inputSource); } }
+        public override bool active { get {
+                Debug.Log("[Mixed Reality Telemetry(SteamVR_Action_Pose_Source.active)] activeBinding: " + activeBinding.ToString());
+                Debug.Log("[Mixed Reality Telemetry(SteamVR_Action_Pose_Source.active)] actionSet.IsActive: " + action.actionSet.IsActive(inputSource).ToString());
+                return activeBinding && action.actionSet.IsActive(inputSource); } }
 
         /// <summary>True if the action is bound</summary>
         public override bool activeBinding { get { return poseActionData.bActive; } }

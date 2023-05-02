@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Linq;
 using Valve.Newtonsoft.Json;
 using System.Text;
+//using static Valve.VR.SteamVR_Events;
 
 namespace Valve.VR
 {
@@ -154,7 +155,7 @@ namespace Valve.VR
                 return;
 #endif
 
-            //Debug.Log("<b>[SteamVR]</b> Initializing SteamVR input...");
+            Debug.Log("<b>[SteamVR]</b> Initializing SteamVR input...");
             initializing = true;
 
             startupFrame = Time.frameCount;
@@ -166,12 +167,14 @@ namespace Valve.VR
             {
                 SteamVR_Action action = actions[actionIndex];
                 action.Initialize(true);
+                Debug.Log("[MixedReality Telemetry]: " +  action.GetShortName());
             }
 
             for (int actionSetIndex = 0; actionSetIndex < actionSets.Length; actionSetIndex++)
             {
                 SteamVR_ActionSet set = actionSets[actionSetIndex];
                 set.Initialize(true);
+                Debug.Log("[MixedReality Telemetry]: " + set.GetShortName() + set.IsActive());
             }
 
             if (SteamVR_Settings.instance.activateFirstActionSetOnStart)

@@ -200,8 +200,14 @@ namespace Valve.VR
 
                         if (cameraPose != null && SteamVR_Settings.instance.mixedRealityActionSetAutoEnable)
                         {
+                            Debug.Log("[Mixed Reality Telemetry]: cameraPose.actionSet is " + ((cameraPose.actionSet != null) ? "not " : "") + "null");
+                            Debug.Log("[Mixed Reality Telemetry]: cameraPose.actionSet.IsActive(cameraSource) = " + cameraPose.actionSet.IsActive(cameraSource).ToString());
                             if (cameraPose.actionSet != null && cameraPose.actionSet.IsActive(cameraSource) == false)
+                            {
+                                Debug.Log("[Mixed Reality Telemetry]: Activating Camera Source");
                                 cameraPose.actionSet.Activate(cameraSource);
+                                Debug.Log("[Mixed Reality Telemetry]: cameraPose[cameraSource].active - " + cameraPose[cameraSource].active.ToString());
+                            }
                         }
 
                         if (cameraPose == null)
@@ -213,11 +219,11 @@ namespace Valve.VR
                         Debug.Log("SteamVR_Render.CheckExternalCamera: cameraPose - " + cameraPose.ToString());
                         Debug.Log("SteamVR_Render.CheckExternalCamera: cameraSource - " + cameraSource.ToString());
                         if (cameraPose != null)
-                        {
+                        {                            
                             Debug.Log("SteamVR_Render.CheckExternalCamera: cameraPose[cameraSource].active - " + cameraPose[cameraSource].active.ToString());
                             Debug.Log("SteamVR_Render.CheckExternalCamera: cameraPose[cameraSource].deviceIsConnected - " + cameraPose[cameraSource].deviceIsConnected.ToString());
                         }
-                        if (cameraPose != null && cameraPose[cameraSource].active && cameraPose[cameraSource].deviceIsConnected)
+                        if (cameraPose != null && (cameraPose[cameraSource].active && cameraPose[cameraSource].deviceIsConnected) || true)
                         {
                             GameObject instance = Instantiate(prefab);
                             instance.gameObject.name = "External Camera";
@@ -230,7 +236,7 @@ namespace Valve.VR
                     }
                 }
             }
-            Debug.Log("SteamVR_Render.CheckExternalCamera: Result - " + (externalCamera != null).ToString());
+            //Debug.Log("SteamVR_Render.CheckExternalCamera: Result - " + (externalCamera != null).ToString());
             return (externalCamera != null);
         }
 
