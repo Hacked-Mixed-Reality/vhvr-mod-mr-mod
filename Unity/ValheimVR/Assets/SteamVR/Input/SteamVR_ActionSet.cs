@@ -229,6 +229,9 @@ namespace Valve.VR
         /// <param name="activateForSource">Will activate this action set only for the specified source. Any if you want to activate for everything</param>
         public void Activate(SteamVR_Input_Sources activateForSource = SteamVR_Input_Sources.Any, int priority = 0, bool disableAllOtherActionSets = false)
         {
+            Debug.Log("[Mixed Reality Telemetry]: Activating ActionSet: " + this.fullPath);
+            Debug.Log("[Mixed Reality Telemetry]: activateForSource: " + activateForSource.ToString());
+
             setData.Activate(activateForSource, priority, disableAllOtherActionSets);
         }
 
@@ -519,6 +522,12 @@ namespace Valve.VR
 
             if (disableAllOtherActionSets)
                 SteamVR_ActionSet_Manager.DisableAllActionSets();
+
+            if (this.fullPath.Contains("xternal"))
+            {
+                Debug.Log("[Mixed Reality Telemetry]: Activate: " + activateForSource.ToString());
+                Debug.Log("[Mixed Reality Telemetry]: rawSetActive[sourceIndex]: " + rawSetActive[sourceIndex]);
+            }
 
             if (rawSetActive[sourceIndex] == false)
             {

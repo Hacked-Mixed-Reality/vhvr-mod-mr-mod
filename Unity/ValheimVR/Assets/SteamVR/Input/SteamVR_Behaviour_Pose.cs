@@ -126,6 +126,9 @@ namespace Valve.VR
 
             if (origin != null)
             {
+                if(transform == null) { Debug.Log("[Mixed Reality] transform is null"); }
+                if(origin.transform == null) { Debug.Log("[Mixed Reality] origin.transform is null"); }
+
                 transform.position = origin.transform.TransformPoint(poseAction[inputSource].localPosition);
                 transform.rotation = origin.rotation * poseAction[inputSource].localRotation;
             }
