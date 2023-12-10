@@ -325,7 +325,8 @@ namespace ValheimVRMod.Patches
                     flag = false;
                 }
                 Matrix4x4 matrix4x4 = Matrix4x4.TRS(__instance.gameObject.transform.position, Quaternion.identity, Vector3.one);
-                Graphics.DrawMesh(__instance.m_renderMesh, matrix4x4, __instance.m_materialInstance, __instance.gameObject.layer, Utils.GetMainCamera(), 0, new MaterialPropertyBlock(), shadowCastingMode, flag);
+                //Graphics.DrawMesh(__instance.m_renderMesh, matrix4x4, __instance.m_materialInstance, __instance.gameObject.layer, Utils.GetMainCamera(), 0, new MaterialPropertyBlock(), shadowCastingMode, flag);
+                Graphics.DrawMesh(__instance.m_renderMesh, matrix4x4, __instance.m_materialInstance, __instance.gameObject.layer, null, 0, new MaterialPropertyBlock(), shadowCastingMode, flag);
             }
             return false;
         }

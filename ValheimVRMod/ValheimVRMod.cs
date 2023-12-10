@@ -7,6 +7,7 @@ using ValheimVRMod.Scripts;
 using ValheimVRMod.Patches;
 
 using static ValheimVRMod.Utilities.LogUtils;
+using UnityEngine.SceneManagement;
 
 namespace ValheimVRMod
 {
@@ -20,6 +21,7 @@ namespace ValheimVRMod
         private GameObject vrPlayer;
         private GameObject vrGui;
         private GameObject BhapticsTactsuit;
+        private LIVMod.StandardLIVMod livMod = null;
 
         void Awake() {
             _version = Info.Metadata.Version;
@@ -40,22 +42,65 @@ namespace ValheimVRMod
         void Start()
         {
             StartValheimVR();
+            StartLiv();
         }
+        public void StartLiv()
+        {
+            if (livMod == null)
+            {
+                Debug.Log("[Liv Mod] Attempting to start LIV mod.");
+                GameObject livModParent = new GameObject();
+                livMod = livModParent.AddComponent<LIVMod.StandardLIVMod>();
+            }
+            else
+            {
+                Debug.Log("[Liv Mod] Attempting to restart LIV mod.");
+                livMod.TrySetupLiv();
+            }
+
+        }
+
+        
 
         void Update()
         {
             if (VHVRConfig.NonVrPlayer()) {
                 return;
             }
-            
+
             if (Input.GetKeyDown(VHVRConfig.GetRecenterKey()))
             {
                 VRManager.tryRecenter();
             }
+
+            if (Time.frameCount % 200 == 0 && (livMod == null || !livMod.IsLivActive()))
+                StartLiv();
 #if DEBUG
             if (Input.GetKeyDown(KeyCode.Backslash))
             {
               //  dumpall();
+                
+                LIVMod.LivDebug.LogAllCameraHierarchies();
+                Debug.Log("#################################");
+                Camera[] cameras = GameObject.FindObjectsByType<Camera>(FindObjectsSortMode.InstanceID);
+                foreach (Camera cam in cameras)
+                {
+                    if(cam.name== "LIV Camera")
+                    {
+                        cam.useOcclusionCulling = false;
+                        
+                        cam.cullingMatrix = new Matrix4x4(
+                            new Vector4(1, 1, 1, 1),
+                            new Vector4(1, 1, 1, 1),
+                            new Vector4(1, 1, 1, 1),
+                            new Vector4(1, 1, 1, 1)
+                        );
+                        //*/
+                        CameraUtils.PrintCamera(cam);
+                        break;
+                    }
+                    Debug.Log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+                }
             }
 #endif
         }
@@ -63,12 +108,12 @@ namespace ValheimVRMod
         void StartValheimVR()
         {
             HarmonyPatcher.DoPatching();
-            
+
             if (VHVRConfig.NonVrPlayer()) {
                 LogDebug("Non VR Mode Patching Complete.");
                 return;
             }
-            
+
             if (VRManager.InitializeVR())
             {
                 VRManager.StartVR();
