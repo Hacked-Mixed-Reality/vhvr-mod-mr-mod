@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Reflection.Emit;
 using System.Reflection;
 using System.IO;
@@ -55,7 +55,7 @@ namespace ValheimVRMod.Patches
     }
 
     // This patch just forces IsUsingSteamVRInput to always return true.
-    // Without this, there seems to be some problem with how the DLL namespacest
+    // Without this, there seems to be some problem with how the DLL namespaces
     // are loaded when using certain other mods. Normally this method will result
     // in a call to the Assembly.GetTypes method, but for whatever reason, this
     // ends up throwing an exception and crashes the mod. The mod I know that causes
@@ -83,6 +83,10 @@ namespace ValheimVRMod.Patches
     {
         public static bool Prefix()
         {
+            if (VHVRConfig.NonVrPlayer())
+            {
+                return true;
+            }
             return false;
         }
     }
@@ -113,6 +117,10 @@ namespace ValheimVRMod.Patches
         static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
         {
             var original = new List<CodeInstruction>(instructions);
+            if (VHVRConfig.NonVrPlayer())
+            {
+                return original;
+            }
             for (int i = 0; i < original.Count; i++)
             {
                 if (i + 4 < original.Count)
@@ -173,6 +181,10 @@ namespace ValheimVRMod.Patches
         static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
         {
             var original = new List<CodeInstruction>(instructions);
+            if (VHVRConfig.NonVrPlayer())
+            {
+                return original;
+            }
             var patched = new List<CodeInstruction>();
             for (int i = 0; i < original.Count; i++)
             {
@@ -259,77 +271,38 @@ namespace ValheimVRMod.Patches
     }
 
     //Supposedly only update on Start, but somehow it doesnt work on some mobs (eg. fuling/goblin), so its using fixedupdate for now
-    [HarmonyPatch(typeof(Character),nameof(Character.FixedUpdate))]
+    [HarmonyPatch(typeof(Character), nameof(Character.CustomFixedUpdate))]
     class CharacterSetLodGroupSize
     {
-        private static Dictionary<String, float> creatures = new Dictionary<string, float>();
+        private static Dictionary<String, float> originalRenderDistances = new Dictionary<string, float>();
+
         public static void Postfix(Character __instance)
         {
-            if (VHVRConfig.NonVrPlayer())
-            {
-                return;
-            }
-            //return in case no lod group
-            if (!__instance.m_lodGroup)
+            if (VHVRConfig.NonVrPlayer() || __instance == Player.m_localPlayer || !__instance.m_lodGroup)
             {
                 return;
             }
 
-            //add new creature on list if its not in yet
-            if (!creatures.ContainsKey(__instance.m_name)) 
-            {
-                creatures[__instance.m_name] = __instance.m_lodGroup.size;
-            }
-
-            if(__instance.m_tamed && __instance.m_lodGroup.size != creatures[__instance.m_name])
-            {
-                __instance.m_lodGroup.size = creatures[__instance.m_name];
-            }
-            else
-            {
-                if(creatures[__instance.m_name] < VHVRConfig.GetEnemyRenderDistanceValue() && __instance.m_lodGroup.size != VHVRConfig.GetEnemyRenderDistanceValue())
-                {
-                    __instance.m_lodGroup.size = VHVRConfig.GetEnemyRenderDistanceValue();
-                }
-                else if (creatures[__instance.m_name] > VHVRConfig.GetEnemyRenderDistanceValue() && __instance.m_lodGroup.size != creatures[__instance.m_name])
-                {
-                    __instance.m_lodGroup.size = creatures[__instance.m_name];
-                }
-                
-            }
+            UpdateRenderDistance(__instance.m_name, __instance.m_lodGroup, restoreOriginalRenderDistance: __instance.m_tamed);
         }
-    }
 
-    // Pass correct camera to Graphics.DrawMesh
-    [HarmonyPatch(typeof(Heightmap), nameof(Heightmap.Render))]
-    class HeightMapRenderPatch
-    {
-        static bool Prefix(Heightmap __instance)
+        private static void UpdateRenderDistance(string key, LODGroup lodGroup, bool restoreOriginalRenderDistance)
         {
-            if (VHVRConfig.NonVrPlayer())
+            if (!originalRenderDistances.ContainsKey(key))
             {
-                return true;
+                LogUtils.LogDebug("Registering render distance of: " + key);
+                originalRenderDistances[key] = lodGroup.size;
             }
-            ShadowCastingMode shadowCastingMode;
-            bool flag;
-            if (__instance.m_renderMesh)
+
+            float desiredRenderDistance =
+                restoreOriginalRenderDistance ?
+                originalRenderDistances[key] :
+                Mathf.Max(originalRenderDistances[key], VHVRConfig.GetEnemyRenderDistanceValue());
+
+            if (lodGroup.size != desiredRenderDistance)
             {
-                if (!__instance.m_isDistantLod)
-                {
-                    shadowCastingMode = (Heightmap.EnableDistantTerrainShadows ? ShadowCastingMode.On : ShadowCastingMode.TwoSided);
-                    flag = true;
-                }
-                else
-                {
-                    shadowCastingMode = (Heightmap.EnableDistantTerrainShadows ? ShadowCastingMode.On : ShadowCastingMode.Off);
-                    flag = false;
-                }
-                Matrix4x4 matrix4x4 = Matrix4x4.TRS(__instance.gameObject.transform.position, Quaternion.identity, Vector3.one);
-                //Graphics.DrawMesh(__instance.m_renderMesh, matrix4x4, __instance.m_materialInstance, __instance.gameObject.layer, Utils.GetMainCamera(), 0, new MaterialPropertyBlock(), shadowCastingMode, flag);
-                Graphics.DrawMesh(__instance.m_renderMesh, matrix4x4, __instance.m_materialInstance, __instance.gameObject.layer, null, 0, new MaterialPropertyBlock(), shadowCastingMode, flag);
+                lodGroup.size = desiredRenderDistance;
             }
-            return false;
         }
     }
-
 }

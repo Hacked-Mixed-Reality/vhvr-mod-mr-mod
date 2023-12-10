@@ -11,7 +11,7 @@ using UnityEngine.SceneManagement;
 
 namespace ValheimVRMod
 {
-    [BepInPlugin("org.bepinex.plugins.valheimvrmod", "ValheimVR Mod", "0.9.7")]
+    [BepInPlugin("org.bepinex.plugins.valheimvrmod", "ValheimVR Mod", "0.9.12")]
     public class ValheimVRMod : BaseUnityPlugin
     {
 

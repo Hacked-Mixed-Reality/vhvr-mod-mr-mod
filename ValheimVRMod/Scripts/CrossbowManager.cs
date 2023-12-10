@@ -10,8 +10,6 @@ namespace ValheimVRMod.Scripts {
         private static readonly Quaternion frontGripRotationForLeftHand = Quaternion.Euler(0, -15, 90);
         private static readonly Quaternion frontGripRotationForRightHand = Quaternion.Euler(0, 0, -120);
 
-        private Quaternion originalLocalRotation;
-
         private CrossbowMorphManager crossbowMorphManager;
 
         void Start()
@@ -22,16 +20,16 @@ namespace ValheimVRMod.Scripts {
         protected override void Awake()
         {
             base.Awake();
-            originalLocalRotation = transform.localRotation;
             // The mesh for the unloaded bow and and the mesh for the loaded bow are in two different child game objects.
             // We only need to use our custom bending animation on the unloaded one.
-            crossbowMorphManager = transform.FindChild("Unloaded").gameObject.AddComponent<CrossbowMorphManager>();
+            crossbowMorphManager = transform.Find("Unloaded").gameObject.AddComponent<CrossbowMorphManager>();
         }
 
         protected override void OnRenderObject()
         {
             base.OnRenderObject();
             isRedDotVisible = VHVRConfig.UseArrowPredictionGraphic() && twoHandedState != TwoHandedState.SingleHanded;
+            CrossbowMorphManager.instance.loadBoltIfBoltinHandIsNearAnchor();
         }
 
         public static bool CanQueueReloadAction() {
@@ -69,18 +67,19 @@ namespace ValheimVRMod.Scripts {
 
         protected override Vector3 GetPreferredTwoHandedWeaponUp()
         {
-            Vector3 rearHandRadial = rearHandTransform.up;
+            Vector3 rearHandleUp = Vector3.Cross(frontHandTransform.position - rearHandTransform.position, rearHandTransform.right).normalized;
             switch (VHVRConfig.CrossbowSaggitalRotationSource())
             {
                 case "RearHand":
-                    return rearHandRadial;
+                    return rearHandleUp;
                 case "BothHands":
                     Vector3 frontHandPalmar = twoHandedState == TwoHandedState.LeftHandBehind ? -frontHandTransform.right : frontHandTransform.right;
                     Vector3 frontHandRadial = frontHandTransform.up;
-                    return (frontHandPalmar * 1.73f + frontHandRadial).normalized + rearHandRadial;
+                    Vector3 frontHandleUp = (frontHandPalmar * 1.73f + frontHandRadial).normalized;
+                    return frontHandleUp + rearHandleUp;
                 default:
                     LogUtils.LogWarning("WeaponWield: unknown CrossbowSaggitalRotationSource");
-                    return rearHandRadial;
+                    return rearHandleUp;
             }
         }
 
@@ -100,15 +99,25 @@ namespace ValheimVRMod.Scripts {
             {
                 return false;
             }
+
+            bool isPullingTrigger = false;
             switch (instance.twoHandedState)
             {
                 case TwoHandedState.LeftHandBehind:
-                    return SteamVR_Actions.valheim_UseLeft.stateDown;
+                    isPullingTrigger = SteamVR_Actions.valheim_UseLeft.stateDown;
+                    break;
                 case TwoHandedState.RightHandBehind:
-                    return SteamVR_Actions.valheim_Use.stateDown;
-                default:
-                    return false;
+                    isPullingTrigger = SteamVR_Actions.valheim_Use.stateDown;
+                    break;
             }
+
+            if (isPullingTrigger && !CrossbowMorphManager.instance.isBoltLoaded)
+            {
+                Player.m_localPlayer.ResetLoadedWeapon();
+                return false;
+            }
+            
+            return isPullingTrigger;
         }
 
         public static Vector3 AimDir { get { return weaponForward; } }

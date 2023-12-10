@@ -89,9 +89,10 @@ namespace ValheimVRMod.Patches
     {
         public static void Postfix(ref Vector3 __result)
         {
-            if (! VHVRConfig.NonVrPlayer()) {
-                __result = SoftwareCursor.simulatedMousePosition;
+            if (VHVRConfig.NonVrPlayer()) {
+                return;
             }
+            __result = SoftwareCursor.simulatedMousePosition;
         }
     }
 
@@ -421,7 +422,7 @@ namespace ValheimVRMod.Patches
             private static MethodInfo enemyHudRemoveMethod =
                 AccessTools.Method(AccessTools.Field(typeof(EnemyHud), nameof(EnemyHud.m_huds)).FieldType, "Remove", new Type[] { typeof(Character) });
             private static MethodInfo worldToScreenPointMethod =
-                AccessTools.Method(typeof(Camera), nameof(Camera.WorldToScreenPoint), new Type[] { typeof(Vector3) });
+                AccessTools.Method(typeof(Utils), nameof(Utils.WorldToScreenPointScaled), new Type[] { typeof(Camera), typeof(Vector3) });
 
             private static bool patchedSetActiveTrue = false;
             private static bool patchedSetActiveFalse = false;
@@ -798,14 +799,16 @@ namespace ValheimVRMod.Patches
     {
         static bool Prefix(HotkeyBar __instance)
         {
+            if (VHVRConfig.NonVrPlayer())
+            {
+                return true;
+            }
             if (VHVRConfig.HideHotbar())
             {
                 clearHotbar(__instance);
                 return false;
-            } else
-            {
-                return true;
             }
+            return true;
         }
 
         private static void clearHotbar(HotkeyBar hotkeyBar)
@@ -979,6 +982,24 @@ namespace ValheimVRMod.Patches
         }
     }
 
+    [HarmonyPatch(typeof(Minimap), "GetMaskColor")]
+    class MinimapMaskColorPatch
+    {
+        static void Postfix(Minimap __instance, Heightmap.Biome biome, ref Color __result)
+        {
+            if (VHVRConfig.NonVrPlayer())
+            {
+                return;
+            }
+            if (biome == Heightmap.Biome.Mistlands)
+            {
+                // For some reason, bright mask colors makes Mistland completely transparent and hard to see on the large map in VR,
+                // so we need to dim it to prevent that from happening.
+                __result /= 2f;
+            }
+        }
+    }
+
     [HarmonyPatch(typeof(InventoryGui), "UpdateItemDrag")]
     class PatchItemDragMouseFix
     {
@@ -992,8 +1013,8 @@ namespace ValheimVRMod.Patches
             {
                 __instance.m_dragGo.transform.position = SoftwareCursor.ScaledMouseVector() + new Vector3(10,50);
                 Image component = __instance.m_dragGo.transform.Find("icon").GetComponent<Image>();
-                Text component2 = __instance.m_dragGo.transform.Find("name").GetComponent<Text>();
-                Text component3 = __instance.m_dragGo.transform.Find("amount").GetComponent<Text>();
+                TMPro.TMP_Text component2 = __instance.m_dragGo.transform.Find("name").GetComponent<TMPro.TMP_Text>();
+                TMPro.TMP_Text component3 = __instance.m_dragGo.transform.Find("amount").GetComponent<TMPro.TMP_Text>();
                 component.sprite = __instance.m_dragItem.GetIcon();
                 component2.text = __instance.m_dragItem.m_shared.m_name;
                 component3.text = ((__instance.m_dragAmount > 1) ? __instance.m_dragAmount.ToString() : "");

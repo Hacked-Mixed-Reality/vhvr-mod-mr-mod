@@ -9,8 +9,8 @@ using ValheimVRMod.Utilities;
 
 namespace ValheimVRMod.Patches {
 
-     [HarmonyPatch(typeof(VisEquipment), nameof(VisEquipment.SetRightHandEquiped))]
-     class PatchSetRightHandEquiped {
+    [HarmonyPatch(typeof(VisEquipment), nameof(VisEquipment.SetRightHandEquipped))]
+    class PatchSetRightHandEquipped {
         static void Postfix(bool __result, string ___m_rightItem, ref GameObject ___m_rightItemInstance) {
             if (!__result || !___m_rightItemInstance) {
                 return;
@@ -100,8 +100,8 @@ namespace ValheimVRMod.Patches {
         }
     }
 
-    [HarmonyPatch(typeof(VisEquipment), nameof(VisEquipment.SetLeftHandEquiped))]
-    class PatchSetLeftHandEquiped {
+    [HarmonyPatch(typeof(VisEquipment), nameof(VisEquipment.SetLeftHandEquipped))]
+    class PatchSetLeftHandEquipped {
         static void Postfix(bool __result, string ___m_leftItem, GameObject ___m_leftItemInstance) {
             if (!__result || !___m_leftItemInstance) {
                 return;
@@ -160,18 +160,13 @@ namespace ValheimVRMod.Patches {
             switch (EquipScript.getLeft()) {
                 case EquipType.Bow:
                     meshFilter.gameObject.AddComponent<BowLocalManager>();
-                    var bow = Player.m_localPlayer.GetLeftItem();
-                    if (!Attack.HaveAmmo(Player.m_localPlayer, bow))
-                    {
-                        return;
-                    }
-                    Attack.EquipAmmoItem(Player.m_localPlayer, bow);
-                    
+                    EquipScript.equipAmmo();                   
                     return;
                 case EquipType.Crossbow:
                     CrossbowManager crossbowManager = ___m_leftItemInstance.AddComponent<CrossbowManager>();
                     crossbowManager.Initialize(Player.m_localPlayer.GetLeftItem(), ___m_leftItem);
                     crossbowManager.gameObject.AddComponent<WeaponBlock>().weaponWield = crossbowManager;
+                    EquipScript.equipAmmo();
                     return;
                 case EquipType.Lantern:
                     // TODO: implement a component that makes dverger lantern hangs downward regardless of hand orientation.
@@ -185,8 +180,8 @@ namespace ValheimVRMod.Patches {
             ParticleFix.maybeFix(___m_leftItemInstance);
         }
     }
-    
-    [HarmonyPatch(typeof(VisEquipment), nameof(VisEquipment.SetHelmetEquiped))]
+
+    [HarmonyPatch(typeof(VisEquipment), nameof(VisEquipment.SetHelmetEquipped))]
     class PatchHelmet {
         static void Postfix(bool __result, GameObject ___m_helmetItemInstance) {
 
@@ -197,8 +192,8 @@ namespace ValheimVRMod.Patches {
             ___m_helmetItemInstance.AddComponent<HeadEquipVisibiltiyUpdater>();
         }
     }
-    
-    [HarmonyPatch(typeof(VisEquipment), nameof(VisEquipment.SetHairEquiped))]
+
+    [HarmonyPatch(typeof(VisEquipment), nameof(VisEquipment.SetHairEquipped))]
     class PatchHair {
         static void Postfix(bool __result, GameObject ___m_hairItemInstance) {
             
@@ -209,8 +204,8 @@ namespace ValheimVRMod.Patches {
             ___m_hairItemInstance.AddComponent<HeadEquipVisibiltiyUpdater>();
         }
     }
-    
-    [HarmonyPatch(typeof(VisEquipment), nameof(VisEquipment.SetBeardEquiped))]
+
+    [HarmonyPatch(typeof(VisEquipment), nameof(VisEquipment.SetBeardEquipped))]
     class PatchBeard {
         static void Postfix(bool __result, GameObject ___m_beardItemInstance) {
             
@@ -222,7 +217,7 @@ namespace ValheimVRMod.Patches {
         }
     }
 
-    [HarmonyPatch(typeof(VisEquipment), nameof(VisEquipment.SetChestEquiped))]
+    [HarmonyPatch(typeof(VisEquipment), nameof(VisEquipment.SetChestEquipped))]
     class PatchSetChestEquiped
     {
         static void Postfix(bool __result, string ___m_chestItem, List<GameObject> ___m_chestItemInstances)
@@ -253,7 +248,10 @@ namespace ValheimVRMod.Patches {
         /// For Left Handed mode, switch left with right items
         /// </summary>
         static void Prefix(VisEquipment __instance, ref Transform joint) {
-
+            if (joint == null)
+            {
+                return;
+            }
             Player player = joint.GetComponentInParent<Player>();
             if (player == null)
             {
@@ -363,7 +361,7 @@ namespace ValheimVRMod.Patches {
         }
     }
 
-    [HarmonyPatch(typeof(Player),nameof(Player.ToggleEquiped))]
+    [HarmonyPatch(typeof(Player), "ToggleEquipped")]
     class PatchEquipActionQueue
     {
         static bool Prefix(Player __instance, ref bool __result)
