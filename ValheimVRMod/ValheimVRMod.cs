@@ -21,6 +21,7 @@ namespace ValheimVRMod
         private GameObject vrPlayer;
         private GameObject vrGui;
         private GameObject BhapticsTactsuit;
+        private GameObject LivModParent;
         private LIVMod.StandardLIVMod livMod = null;
 
         void Awake() {
@@ -49,8 +50,10 @@ namespace ValheimVRMod
             if (livMod == null)
             {
                 Debug.Log("[Liv Mod] Attempting to start LIV mod.");
-                GameObject livModParent = new GameObject();
-                livMod = livModParent.AddComponent<LIVMod.StandardLIVMod>();
+                LivModParent = new GameObject();
+                DontDestroyOnLoad(LivModParent);
+                livMod = LivModParent.AddComponent<LIVMod.StandardLIVMod>();
+                livMod.TrySetupLiv();
             }
             else
             {
@@ -73,6 +76,7 @@ namespace ValheimVRMod
                 VRManager.tryRecenter();
             }
 
+            //This is why I don't get invited to parties.
             if (Time.frameCount % 200 == 0 && (livMod == null || !livMod.IsLivActive()))
                 StartLiv();
 #if DEBUG
