@@ -13,7 +13,7 @@ namespace ValheimVRMod.LIVMod
     public class StandardLIVMod : MonoBehaviour
     {
         public static Action OnPlayerReady;
-
+        private GameObject character = null;
         private GameObject livObject;
         private Camera spawnedCamera;
         private static LIV.SDK.Unity.LIV livInstance;
@@ -24,12 +24,13 @@ namespace ValheimVRMod.LIVMod
             OnPlayerReady += TrySetupLiv;
             SceneManager.sceneLoaded += SceneManager_sceneLoaded;
             SystemLibrary.LoadLibrary($@"{AppDomain.CurrentDomain.BaseDirectory}\LIVAssets\LIV_Bridge.dll");
-            
+
         }
 
         private void SceneManager_sceneLoaded(Scene arg0, LoadSceneMode arg1)
         {
             TrySetupLiv();
+            ShiftPlayerCharacter();
         }
 
         void Update()
@@ -39,6 +40,14 @@ namespace ValheimVRMod.LIVMod
                 Debug.Log(">>> F3: TrySetupLiv");
                 TrySetupLiv();
             }
+            if (Input.GetKeyDown(KeyCode.F4))
+            {
+                Debug.Log(">>> F4: ShiftPlayerCharacter");
+                ShiftPlayerCharacter();
+            }
+            //I'm sorry. I hate this.
+            if (character == null)
+                ShiftPlayerCharacter();
             UpdateFollowSpawnedCamera();
         }
 
@@ -55,7 +64,7 @@ namespace ValheimVRMod.LIVMod
             //Debug.Log("[LIV Mod]>>> Camera count: " + arrCam.Length);
             foreach (Camera cam in arrCam)
             {
-                LivDebug.LogCameraHierarchy(cam);
+                //LivDebug.LogCameraHierarchy(cam);
                 if (cam.name.Contains("LIV "))
                 {
                     continue;
@@ -176,10 +185,10 @@ namespace ValheimVRMod.LIVMod
             livInstance.MRCameraPrefab = cameraFromPrefab;
             livInstance.stage = cameraParent;
             livInstance.disableStandardAssets = true;
-            livInstance.fixPostEffectsAlpha = true; 
+            livInstance.fixPostEffectsAlpha = true;
 
             livInstance.spectatorLayerMask = LivGameLayer.GetLayerMask();
-
+            ShiftPlayerCharacter();
             //livInstance.spectatorLayerMask = ~0;
             //livInstance.spectatorLayerMask &= ~(1 << (int)LivGameLayer.PlayerBody);
             //livInstance.spectatorLayerMask &= ~(1 << (int)LivGameLayer.BuddyBot);
@@ -187,6 +196,19 @@ namespace ValheimVRMod.LIVMod
             //Keeping hand because of one object in right hand couldn't be bothered changing layer
 
             livObject.SetActive(true);
+        }
+
+        public void ShiftPlayerCharacter()
+        {
+            var playerClone = GameObject.Find("Player(Clone)");
+            if (playerClone == null) return;
+            var visual = playerClone.transform.Find("Visual");
+            if (visual == null) return;
+            character = visual.transform.Find("body").gameObject;
+            if (character == null) return;
+
+            character.layer = (int)LivGameLayer.HideGameLayers.PlayerBody;
+            Debug.Log(">>> F4: Shifted Player Character to Layer 7");
         }
     }
 }

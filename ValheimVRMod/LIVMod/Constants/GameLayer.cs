@@ -6,14 +6,14 @@ namespace ValheimVRMod.LIVMod.Constants
 {
     public class LivGameLayer
     {
-        private enum HideGameLayers
+        public enum HideGameLayers
         {
-            PlayerBody = 9,
+            PlayerBody = 7,
         }
 
         private enum ReferenceGameLayers
         {
-            PlayerBody = 9,
+            Character = 9,
         }
 
         public static LayerMask GetLayerMask()
